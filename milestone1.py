@@ -116,5 +116,5 @@ print_generic_header()
 print_calculated_values()
 print_results()
 
-# Get all files in the data directory and send files to parsing function
+# Parse the file and print the required information
 parse_file(results.trace_file)
