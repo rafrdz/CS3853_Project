@@ -83,12 +83,12 @@ def print_results():
 def parse_file(file):
     try:
         with open(file, 'r') as f:
-            line_count = 0
+            print_count = 0
             for line in f:
                 info = re.match(r'^.+\((\d{2})\).\s{1}(.{8}).+$', line)
-                if info:
+                if info and print_count <= 20:
                     print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
-                line_count += 1
+                    print_count += 1
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
