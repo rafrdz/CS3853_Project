@@ -95,6 +95,13 @@ def parse_file(file):
         sys.exit(2)
 
 
+# Verify the correct number of arguments
+if len(sys.argv) < 11:
+    print('Error: Invalid number of arguments')
+    print('Usage: [python file] -f [trace file] -s [cache size] -b [block size] -a [associativity] '
+          '-r [replacement policy]')
+    sys.exit(3)
+
 # Define the parser arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-f', action="store", dest="trace_file", type=determine_valid_file)
