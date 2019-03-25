@@ -39,11 +39,19 @@ def determine_block_offset():
 
 
 def determine_index_size():
-    return int(math.log(results.cache_size, 2) - (math.log(results.block_size, 2) + math.log(results.associativity, 2)))
+    return int(math.log((results.cache_size * pow(2, 10)), 2) - (math.log(results.block_size, 2) + math.log(results.associativity, 2)))
 
 
 def determine_indices():
-    return int(results.cache_size/(results.block_size * results.associativity))
+    return int((results.cache_size * pow(2, 10))/(results.block_size * results.associativity))
+
+
+def determine_number_of_blocks():
+    return int(indices * results.associativity)
+
+
+def determine_total_implementation_size():
+    return int((results.cache_size * pow(2, 10)) + results.associativity * (1 + tag_size) * (indices/8))
 
 
 def print_formatted_header():
@@ -68,10 +76,10 @@ def print_generic_header():
 
 def print_calculated_values():
     print('----- Calculated Values -----')
-    print('Total #Blocks: ' + str(int(pow(2, results.block_size)/1024)))
+    print('Total #Blocks: ' + str(num_blocks))
     print('Tag Size: ' + str(tag_size) + ' bits')
     print('Index Size: ' + str(index_size) + ' bits, Total Indices: ' + str(indices) + ' KB')
-    print('Implementation Memory Size: TBD')
+    print('Implementation Memory Size: ' + str(total_size) + ' bytes')
 
 
 def print_results():
@@ -86,7 +94,7 @@ def parse_file(file):
             print_count = 0
             for line in f:
                 info = re.match(r'^.+\((\d{2})\).\s{1}(.{8}).+$', line)
-                if info and print_count <= 20:
+                if info and print_count <= 19:
                     print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
                     print_count += 1
     except FileNotFoundError:
@@ -116,6 +124,8 @@ block_offset = determine_block_offset()
 index_size = determine_index_size()
 tag_size = 32 - index_size - block_offset
 indices = determine_indices()
+num_blocks = determine_number_of_blocks()
+total_size = determine_total_implementation_size()
 
 # Print the specified headers
 print_formatted_header()
