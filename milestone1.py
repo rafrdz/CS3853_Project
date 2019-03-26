@@ -50,8 +50,12 @@ def determine_number_of_blocks():
     return int(indices * results.associativity)
 
 
+def determine_overhead():
+    return int(results.associativity * (1 + tag_size) * (indices/8))
+
+
 def determine_total_implementation_size():
-    return int((results.cache_size * pow(2, 10)) + results.associativity * (1 + tag_size) * (indices/8))
+    return int((results.cache_size * pow(2, 10)) + overhead)
 
 
 def print_formatted_header():
@@ -76,10 +80,13 @@ def print_generic_header():
 
 def print_calculated_values():
     print('----- Calculated Values -----')
-    print('Total #Blocks: ' + str(num_blocks))
+    print('Total #Blocks: ' + str(num_blocks) + ' bytes (or ' + str(int(num_blocks/1024)) + ' KB)' + ' (2^' + str(
+        results.block_size) + ')')
     print('Tag Size: ' + str(tag_size) + ' bits')
-    print('Index Size: ' + str(index_size) + ' bits, Total Indices: ' + str(indices) + ' KB')
-    print('Implementation Memory Size: ' + str(total_size) + ' bytes')
+    print('Index Size: ' + str(index_size) + ' bits, Total Indices: ' + str(indices) + ' bytes (or ' + str(
+        int(indices/1024)) + ' KB)')
+    print('Overhead Memory Size: ' + str(overhead) + ' bytes (or ' + str(int(overhead/1024)) + ' KB)')
+    print('Implementation Memory Size: ' + str(total_size) + ' bytes (or ' + str(int(total_size/1024)) + ' KB)')
 
 
 def print_results():
@@ -125,6 +132,7 @@ index_size = determine_index_size()
 tag_size = 32 - index_size - block_offset
 indices = determine_indices()
 num_blocks = determine_number_of_blocks()
+overhead = determine_overhead()
 total_size = determine_total_implementation_size()
 
 # Print the specified headers
