@@ -1,22 +1,23 @@
 Cache Simulator CS 3853 Spring 2019 - Group #006
 
-Cmd Line: milestone1.py -f sample_trace_files/Trace1.trc -s 128 -b 32 -a 8 -r RR
+Cmd Line: milestone1.py -f sample_trace_files/Trace1.trc -s 256 -b 32 -a 8 -r RR
 Trace File: sample_trace_files/Trace1.trc
-Cache Size: 128
+Cache Size: 256
 Block Size: 32
 Associativity: 8
 R-Policy: RR
 
 Generic:
-Cache Size: 128 KB
+Cache Size: 256 KB
 Block Size: 32 bytes
 Associativity: 8
 Policy: RR
 ----- Calculated Values -----
-Total #Blocks: 4096
-Tag Size: 18 bits
-Index Size: 9 bits, Total Indices: 512 KB
-Implementation Memory Size: 140800 bytes
+Total #Blocks: 8192 bytes (or 8 KB)
+Tag Size: 17 bits
+Index Size: 10 bits, Total Indices: 1024 bytes (or 1 KB)
+Overhead Memory Size: 18432 bytes (or 18 KB)
+Implementation Memory Size: 280576 bytes (or 274 KB)
 ----- Results -----
 Cache Hit Rate: *** %
 

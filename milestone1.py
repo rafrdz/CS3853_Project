@@ -80,8 +80,7 @@ def print_generic_header():
 
 def print_calculated_values():
     print('----- Calculated Values -----')
-    print('Total #Blocks: ' + str(num_blocks) + ' bytes (or ' + str(int(num_blocks/1024)) + ' KB)' + ' (2^' + str(
-        results.block_size) + ')')
+    print('Total #Blocks: ' + str(num_blocks) + ' bytes (or ' + str(int(num_blocks/1024)) + ' KB)')
     print('Tag Size: ' + str(tag_size) + ' bits')
     print('Index Size: ' + str(index_size) + ' bits, Total Indices: ' + str(indices) + ' bytes (or ' + str(
         int(indices/1024)) + ' KB)')

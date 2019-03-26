@@ -13,10 +13,11 @@ Block Size: 16 bytes
 Associativity: 2
 Policy: RR
 ----- Calculated Values -----
-Total #Blocks: 65536
+Total #Blocks: 65536 bytes (or 64 KB)
 Tag Size: 13 bits
-Index Size: 15 bits, Total Indices: 32768 KB
-Implementation Memory Size: 1163264 bytes
+Index Size: 15 bits, Total Indices: 32768 bytes (or 32 KB)
+Overhead Memory Size: 114688 bytes (or 112 KB)
+Implementation Memory Size: 1163264 bytes (or 1136 KB)
 ----- Results -----
 Cache Hit Rate: *** %
 
