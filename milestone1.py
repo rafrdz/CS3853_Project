@@ -5,6 +5,7 @@ import os
 import argparse
 import math
 import re
+import binascii
 
 # CS3853 Computer Architecture Project
 # Milestone 1
@@ -106,6 +107,8 @@ def parse_file(file):
                     print_count += 1
                 if read_write and print_count <= 99:
                     print('Data write at: ' + read_write.group(1) + ' Data read at : ' + read_write.group(2))
+                    test = (binascii.unhexlify(read_write.group(1)))
+                    print('a')
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
