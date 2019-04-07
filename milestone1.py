@@ -110,6 +110,7 @@ def parse_file(file):
                     if empty != read_write.group(1) and empty != read_write.group(2):
                         print('Data write at: 0x' + read_write.group(1) + ' Data read at : 0x' + read_write.group(2))
                         print('Data write address in binary: ' + bin(int(read_write.group(1), 16))[2:])
+                        print('Data read address in binary: ' + bin(int(read_write.group(2), 16))[2:])
                         print('')
     except FileNotFoundError:
         print('Error: File was not found')
