@@ -100,9 +100,12 @@ def parse_file(file):
             print_count = 0
             for line in f:
                 info = re.match(r'^.+\((\d{2})\).\s{1}(.{8}).+$', line)
-                if info and print_count <= 19:
+                read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
+                if info and print_count <= 99:
                     print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
                     print_count += 1
+                if read_write and print_count <= 99:
+                    print('Data write at: ' + read_write.group(1) + ' Data read at : ' + read_write.group(2))
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
