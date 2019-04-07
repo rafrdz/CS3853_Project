@@ -107,8 +107,7 @@ def parse_file(file):
                     print_count += 1
                 if read_write and print_count <= 99:
                     print('Data write at: ' + read_write.group(1) + ' Data read at : ' + read_write.group(2))
-                    test = (binascii.unhexlify(read_write.group(1)))
-                    print('a')
+                    print(binascii.b2a_qp(binascii.unhexlify(read_write.group(1))))
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
