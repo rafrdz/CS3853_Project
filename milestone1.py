@@ -96,6 +96,7 @@ def print_results():
 
 
 def parse_file(file):
+    empty = '00000000'
     try:
         with open(file, 'r') as f:
             print_count = 0
@@ -103,11 +104,13 @@ def parse_file(file):
                 info = re.match(r'^.+\((\d{2})\).\s{1}(.{8}).+$', line)
                 read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
                 if info and print_count <= 99:
-                    print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
+                    #print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
                     print_count += 1
                 if read_write and print_count <= 99:
-                    print('Data write at: ' + read_write.group(1) + ' Data read at : ' + read_write.group(2))
-                    print(bin(int(read_write.group(1), 16))[2:])
+                    if empty != read_write.group(1) and empty != read_write.group(2):
+                        print('Data write at: 0x' + read_write.group(1) + ' Data read at : 0x' + read_write.group(2))
+                        print('Data write address in binary: ' + bin(int(read_write.group(1), 16))[2:])
+                        print('')
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
