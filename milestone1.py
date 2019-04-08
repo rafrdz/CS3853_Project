@@ -108,11 +108,13 @@ def parse_file(file):
                     print_count += 1
                 if read_write and print_count <= 99:
                     if empty != read_write.group(1) and empty != read_write.group(2):
-                        print('Data write at: 0x' + read_write.group(1) + ' Data read at : 0x' + read_write.group(2))
-                        print('Data write address in binary: ' + bin(int(read_write.group(1), 16))[2:])
-                        print('Data write address length: ' + str(len(bin(int(read_write.group(1), 16))[2:])))
-                        print('Data read address in binary: ' + bin(int(read_write.group(2), 16))[2:])
-                        print('Data read address length: ' + str(len(bin(int(read_write.group(2), 16))[2:])))
+                        first_address = '0x' + str(read_write.group(1))
+                        second_address = '0x' + str(read_write.group(2))
+                        bin_first = bin(int(first_address, 16))[2:].zfill(32)
+                        bin_second = bin(int(second_address, 16))[2:].zfill(32)
+                        print('Data write at: ' + first_address + ' Data read at : ' + second_address)
+                        print('Data write address in binary: ' + bin_first)
+                        print('Data read address in binary: ' + bin_second)
                         print('')
     except FileNotFoundError:
         print('Error: File was not found')
