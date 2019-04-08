@@ -95,6 +95,25 @@ def print_results():
     print()
 
 
+def print_sliced_values(binary_string):
+    offset_start = 32 - block_offset
+    index_start = offset_start - index_size
+
+    tag_bin = binary_string[0:index_start]
+    index_bin = binary_string[index_start:offset_start]
+    offset_bin = binary_string[offset_start:32]
+
+    tag_hex = hex(int(tag_bin, 2))
+    index_hex = hex(int(index_bin, 2))
+    offset_hex = hex(int(offset_bin, 2))
+    print('')
+    print('binary number is: ' + binary_string)
+    print('tag bits are: ' + tag_bin + ' tag hex number is: ' + tag_hex)
+    print('index bits are: ' + index_bin + ' index hex number is: ' + index_hex)
+    print('offset bits are: ' + offset_bin + ' offset hex number is: ' + offset_hex)
+    print('')
+
+
 def parse_file(file):
     empty = '00000000'
     try:
@@ -115,6 +134,8 @@ def parse_file(file):
                         print('Data write at: ' + first_address + ' Data read at : ' + second_address)
                         print('Data write address in binary: ' + bin_first)
                         print('Data read address in binary: ' + bin_second)
+                        print_sliced_values(bin_first)
+                        print_sliced_values(bin_second)
                         print('')
     except FileNotFoundError:
         print('Error: File was not found')
