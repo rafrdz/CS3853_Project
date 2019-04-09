@@ -5,7 +5,6 @@ import os
 import argparse
 import math
 import re
-import binascii
 
 # CS3853 Computer Architecture Project
 # Milestone 1
@@ -95,18 +94,35 @@ def print_results():
     print()
 
 
-def print_sliced_values(binary_string):
+def check_cache(index, tag):
+    if index in cache:
+        # TODO: Row is not empty, need to check the valid bit and tag
+        pass
+    else:
+        # TODO: Row is empty, need to set the valid bit to '1' and insert the tag
+        pass
+
+
+def print_sliced_values(hex_num, binary_string, action):
+    # Calculate bit slices
     offset_start = 32 - block_offset
     index_start = offset_start - index_size
 
+    # Divide the binary string into the tag, index, and offset pieces
     tag_bin = binary_string[0:index_start]
     index_bin = binary_string[index_start:offset_start]
     offset_bin = binary_string[offset_start:32]
 
+    # Convert bit pieces into hex
     tag_hex = hex(int(tag_bin, 2))
     index_hex = hex(int(index_bin, 2))
     offset_hex = hex(int(offset_bin, 2))
-    print('')
+
+    # Check the cache
+    check_cache(index_hex[2:], tag_hex[2:])
+
+    print('this is a ' + action)
+    print('hex number is: ' + hex_num)
     print('binary number is: ' + binary_string)
     print('tag bits are: ' + tag_bin + ' tag hex number is: ' + tag_hex)
     print('index bits are: ' + index_bin + ' index hex number is: ' + index_hex)
@@ -114,34 +130,43 @@ def print_sliced_values(binary_string):
     print('')
 
 
+def print_formatted_message(add_param, len_param, write_param, read_param):
+    if write_param != empty and read_param != empty:
+        print_sliced_values(write_param, bin(int(write_param, 16))[2:].zfill(32), 'write')
+        print_sliced_values(read_param, bin(int(read_param, 16))[2:].zfill(32), 'read')
+
+
 def parse_file(file):
-    empty = '00000000'
     try:
         with open(file, 'r') as f:
-            print_count = 0
             for line in f:
-                info = re.match(r'^.+\((\d{2})\).\s{1}(.{8}).+$', line)
+                info = re.match(r'^.+\((\d{2})\).\s(.{8}).+$', line)
                 read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
-                if info and print_count <= 99:
-                    #print('0x' + info.group(2) + ': (' + str(int(info.group(1))) + ')')
-                    print_count += 1
-                if read_write and print_count <= 99:
-                    if empty != read_write.group(1) and empty != read_write.group(2):
-                        first_address = '0x' + str(read_write.group(1))
-                        second_address = '0x' + str(read_write.group(2))
-                        bin_first = bin(int(first_address, 16))[2:].zfill(32)
-                        bin_second = bin(int(second_address, 16))[2:].zfill(32)
-                        print('Data write at: ' + first_address + ' Data read at : ' + second_address)
-                        print('Data write address in binary: ' + bin_first)
-                        print('Data read address in binary: ' + bin_second)
-                        print_sliced_values(bin_first)
-                        print_sliced_values(bin_second)
-                        print('')
+                if info:
+                    global address
+                    global length
+                    address = '0x' + info.group(2)
+                    length = str(int(info.group(1)))
+                if read_write:
+                    global write_address
+                    global read_address
+                    write_address = '0x' + str(read_write.group(1))
+                    read_address = '0x' + str(read_write.group(2))
+                # TODO: Need to fix this being called multiple times
+                print_formatted_message(address, length, write_address, read_address)
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
         sys.exit(2)
 
+
+# Global values
+address = ''
+length = ''
+write_address = '0x00000000'
+read_address = '0x00000000'
+empty = '0x00000000'
+cache = {}
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
@@ -174,7 +199,5 @@ print_generic_header()
 print_calculated_values()
 print_results()
 
-# Parse the file and print the required information
+# Parse the trace file
 parse_file(results.trace_file)
-
-#James Test Comment
