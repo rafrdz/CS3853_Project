@@ -134,6 +134,10 @@ def print_formatted_message(add_param, len_param, write_param, read_param):
     if write_param != empty and read_param != empty:
         print_sliced_values(write_param, bin(int(write_param, 16))[2:].zfill(32), 'write')
         print_sliced_values(read_param, bin(int(read_param, 16))[2:].zfill(32), 'read')
+        global write_address
+        global read_address
+        write_address = empty
+        read_address = empty
 
 
 def parse_file(file):
@@ -152,7 +156,6 @@ def parse_file(file):
                     global read_address
                     write_address = '0x' + str(read_write.group(1))
                     read_address = '0x' + str(read_write.group(2))
-                # TODO: Need to fix this being called multiple times
                 print_formatted_message(address, length, write_address, read_address)
     except FileNotFoundError:
         print('Error: File was not found')
