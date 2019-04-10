@@ -9,3 +9,6 @@ venv/
 
 # Ignore '.vscode' directory
 .vscode
+
+# Ignore '__pycache__' directory
+__pycache__

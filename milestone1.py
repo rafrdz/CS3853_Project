@@ -5,6 +5,7 @@ import os
 import argparse
 import math
 import re
+from cache import Cache
 
 # CS3853 Computer Architecture Project
 # Milestone 1
@@ -118,19 +119,16 @@ def print_sliced_values(hex_num, binary_string, action):
     index_hex = hex(int(index_bin, 2))
     offset_hex = hex(int(offset_bin, 2))
 
-    # Check the cache
-    check_cache(index_hex[2:], tag_hex[2:])
-
     print('this is a ' + action)
     print('hex number is: ' + hex_num)
     print('binary number is: ' + binary_string)
-    print('tag bits are: ' + tag_bin + ' tag hex number is: ' + tag_hex)
-    print('index bits are: ' + index_bin + ' index hex number is: ' + index_hex)
-    print('offset bits are: ' + offset_bin + ' offset hex number is: ' + offset_hex)
+    print('tag bits are: ' + tag_bin + ', tag hex number is: ' + tag_hex)
+    print('index bits are: ' + index_bin + ', index hex number is: ' + index_hex + ', index decimal number is: ' + str(int(index_bin, 2)))
+    print('offset bits are: ' + offset_bin + ', offset hex number is: ' + offset_hex)
     print('')
 
 
-def print_formatted_message(add_param, len_param, write_param, read_param):
+def print_formatted_message(write_param, read_param):
     if write_param != empty and read_param != empty:
         print_sliced_values(write_param, bin(int(write_param, 16))[2:].zfill(32), 'write')
         print_sliced_values(read_param, bin(int(read_param, 16))[2:].zfill(32), 'read')
@@ -156,7 +154,7 @@ def parse_file(file):
                     global read_address
                     write_address = '0x' + str(read_write.group(1))
                     read_address = '0x' + str(read_write.group(2))
-                print_formatted_message(address, length, write_address, read_address)
+                print_formatted_message(write_address, read_address)
     except FileNotFoundError:
         print('Error: File was not found')
         print('Please check that the file exists and try again')
@@ -169,7 +167,6 @@ length = ''
 write_address = '0x00000000'
 read_address = '0x00000000'
 empty = '0x00000000'
-cache = {}
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
@@ -204,3 +201,6 @@ print_results()
 
 # Parse the trace file
 parse_file(results.trace_file)
+
+# Create the cache
+cache = Cache(indices, results.associativity)
