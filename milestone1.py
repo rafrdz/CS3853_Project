@@ -60,44 +60,54 @@ def determine_total_implementation_size():
 
 
 def print_formatted_header():
-    print('Cache Simulator CS 3853 Spring 2019 - Group #006')
+    print('Cache Simulator - CS3853 - Spring 2019 - Group #006')
     print()
-    print('Cmd Line: ' + ' '.join(sys.argv))
+    #print('Cmd Line: ' + ' '.join(sys.argv))
     print('Trace File: ' + results.trace_file)
-    print('Cache Size: ' + str(results.cache_size))
-    print('Block Size: ' + str(results.block_size))
-    print('Associativity: ' + str(results.associativity))
-    print('R-Policy: ' + results.replacement_policy)
+    #print('Cache Size: ' + str(results.cache_size))
+    #print('Block Size: ' + str(results.block_size))
+    #print('Associativity: ' + str(results.associativity))
+    #print('R-Policy: ' + results.replacement_policy)
     print()
 
 
 def print_generic_header():
-    print('Generic:')
+    print('***** Cache Input Parameters *****')
+    print()
     print('Cache Size: ' + str(results.cache_size) + ' KB')
     print('Block Size: ' + str(results.block_size) + ' bytes')
     print('Associativity: ' + str(results.associativity))
-    print('Policy: ' + results.replacement_policy)
+    print('Replacement Policy: ' + results.replacement_policy)
+    print()
 
 
 def print_calculated_values():
-    print('----- Calculated Values -----')
-    print('Total #Blocks: ' + str(num_blocks) + ' bytes (or ' + str(int(num_blocks/1024)) + ' KB)')
+    print('***** Cache Calculated Parameters *****')
+    print()
+    print('Total #Blocks: ' + str(num_blocks))
     print('Tag Size: ' + str(tag_size) + ' bits')
-    print('Index Size: ' + str(index_size) + ' bits, Total Indices: ' + str(indices) + ' bytes (or ' + str(
-        int(indices/1024)) + ' KB)')
-    print('Overhead Memory Size: ' + str(overhead) + ' bytes (or ' + str(int(overhead/1024)) + ' KB)')
-    print('Implementation Memory Size: ' + str(total_size) + ' bytes (or ' + str(int(total_size/1024)) + ' KB)')
+    print('Total # Rows: ' + str(indices))
+    print('Index Size: ' + str(index_size) + ' bits')
+    print('Overhead Memory Size: ' + str(int(overhead/1024)) + ' KB')
+    print('Implementation Memory Size: ' + str(int(total_size/1024)) + ' KB')
+    print()
+    print()
 
 
 def print_results():
-    print('----- Results -----')
+    print('***** Cache Simulation Results *****')
+    print()
     print('Total Cache Accesses: ' + str(len(cache_accesses)))
     print('Cache Hits: ' + str(cache_hits))
     print('Cache Misses: ' + str(cache_misses))
     print('--- Compulsory Misses: ' + str(compulsory_misses))
     print('--- Conflict Misses: ' + str(conflict_misses))
     print()
-    print('Cache Miss Rate: ' + str(cache_misses/len(cache_accesses) * 100) + '%')
+    print()
+    print('***** ***** CACHE MISS RATE: ***** *****')
+    miss_rate = cache_misses/len(cache_accesses) * 100
+    miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
+    print(miss_rate_string + '%')
     print()
 
 
@@ -237,7 +247,7 @@ cache = Cache(indices, results.associativity)
 cache_access(cache_accesses)
 
 # Print the specified results
-#print_formatted_header()
-#print_generic_header()
-#print_calculated_values()
+print_formatted_header()
+print_generic_header()
+print_calculated_values()
 print_results()

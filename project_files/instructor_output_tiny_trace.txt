@@ -1,7 +1,7 @@
 C:\CS3853_Project>CacheSim.exe -f sample_trace_files/TinyTrace.trc -s 1024 -b 16 -a 2 -r RR
 
 
-Cache Simulator - CS3853 - Instructor Version
+Cache Simulator - CS3853 - Instructor Version: 1.01
 
 Trace File: sample_trace_files/TinyTrace.trc
 

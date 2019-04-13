@@ -1,0 +1,35 @@
+C:\CS3853_Project>CacheSim.exe -f sample_trace_files/TestTrace.trc -s 1024 -b 16 -a 2 -r RR
+
+
+Cache Simulator - CS3853 - Instructor Version: 1.01
+
+Trace File: sample_trace_files/TestTrace.trc
+
+***** Cache Input Parameters *****
+
+Cache Size:                     1024 KB
+Block Size:                     16 bytes
+Associativity:                  2
+Replacement Policy:             Round Robin
+
+***** Cache Calculated Parameters *****
+
+Total # Blocks:                 65536
+Tag Size:                       13 bits
+Total # Rows:                   32768
+Index Size:                     15 bits
+Implementation Memory Size:     1136.00 KB
+
+
+***** Cache Simulation Results *****
+
+Total Cache Accesses:   61
+Cache Hits:             47
+Cache Misses:           14
+--- Compulsory Misses:     14
+--- Conflict Misses:       0
+
+
+***** *****  CACHE MISS RATE:  ***** *****
+
+Miss Rate = 22.9508%
