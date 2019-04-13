@@ -91,20 +91,48 @@ def print_calculated_values():
 
 def print_results():
     print('----- Results -----')
-    print('Cache Hit Rate: *** %')
+    print('Total Cache Accesses: ' + str(len(cache_accesses)))
+    print('Cache Hits: ' + str(cache_hits))
+    print('Cache Misses: ' + str(cache_misses))
+    print('--- Compulsory Misses: ' + str(compulsory_misses))
+    print('--- Conflict Misses: ' + str(conflict_misses))
+    print()
+    print('Cache Miss Rate: ' + str(cache_misses/len(cache_accesses) * 100) + '%')
     print()
 
 
-def check_cache(index, tag):
-    if index in cache:
-        # TODO: Row is not empty, need to check the valid bit and tag
-        pass
-    else:
-        # TODO: Row is empty, need to set the valid bit to '1' and insert the tag
-        pass
+def parse_file(file):
+    empty = '0x00000000'
+    try:
+        with open(file, 'r') as f:
+            for line in f:
+                info = re.match(r'^.+\((\d{2})\).\s(.{8}).+$', line)
+                read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
+                if info:
+                    address = '0x' + info.group(2)
+                    length = int(info.group(1))
+                    cache_accesses.append(address + ',' + str(length))
+                if read_write:
+                    write_address = '0x' + str(read_write.group(1))
+                    read_address = '0x' + str(read_write.group(2))
+                    if write_address != empty:
+                        cache_accesses.append(write_address + ',4')
+                    if read_address != empty:
+                        cache_accesses.append(read_address + ',4')
+    except FileNotFoundError:
+        print('Error: File was not found')
+        print('Please check that the file exists and try again')
+        sys.exit(2)
 
 
-def print_sliced_values(hex_num, binary_string, action):
+def cache_access(access_list):
+    for entry in access_list:
+        split = entry.split(',')
+        binary_address = bin(int(split[0], 16))[2:].zfill(32)
+        calculate_values(binary_address, split[1])
+
+
+def calculate_values(binary_string, access_length):
     # Calculate bit slices
     offset_start = 32 - block_offset
     index_start = offset_start - index_size
@@ -119,54 +147,60 @@ def print_sliced_values(hex_num, binary_string, action):
     index_hex = hex(int(index_bin, 2))
     offset_hex = hex(int(offset_bin, 2))
 
-    print('this is a ' + action)
-    print('hex number is: ' + hex_num)
-    print('binary number is: ' + binary_string)
-    print('tag bits are: ' + tag_bin + ', tag hex number is: ' + tag_hex)
-    print('index bits are: ' + index_bin + ', index hex number is: ' + index_hex + ', index decimal number is: ' + str(int(index_bin, 2)))
-    print('offset bits are: ' + offset_bin + ', offset hex number is: ' + offset_hex)
-    print('')
+    # Calculate index decimal number
+    index_decimal = str(int(index_bin, 2))
+
+    check_cache(index_decimal, tag_hex, access_length)
 
 
-def print_formatted_message(write_param, read_param):
-    if write_param != empty and read_param != empty:
-        print_sliced_values(write_param, bin(int(write_param, 16))[2:].zfill(32), 'write')
-        print_sliced_values(read_param, bin(int(read_param, 16))[2:].zfill(32), 'read')
-        global write_address
-        global read_address
-        write_address = empty
-        read_address = empty
+def check_cache(index, tag, access_length):
+    global compulsory_misses
+    global cache_hits
+    global cache_misses
+    # Get the current row based on the index
+    current_row = cache.get_row_by_index(int(index) - 1)
+    print('Cache access at index: ' + index + ', with tag: ' + tag)
 
-
-def parse_file(file):
-    try:
-        with open(file, 'r') as f:
-            for line in f:
-                info = re.match(r'^.+\((\d{2})\).\s(.{8}).+$', line)
-                read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
-                if info:
-                    global address
-                    global length
-                    address = '0x' + info.group(2)
-                    length = str(int(info.group(1)))
-                if read_write:
-                    global write_address
-                    global read_address
-                    write_address = '0x' + str(read_write.group(1))
-                    read_address = '0x' + str(read_write.group(2))
-                print_formatted_message(write_address, read_address)
-    except FileNotFoundError:
-        print('Error: File was not found')
-        print('Please check that the file exists and try again')
-        sys.exit(2)
+    # TODO: Need to add logic for replace and replacement algorithm
+    if results.associativity == 1:
+        # Check for compulsory miss
+        if current_row.valid == 0:
+            compulsory_misses += 1
+            cache_misses += 1
+            current_row.tag = tag
+            current_row.valid = 1
+        else:
+            # Row has a valid bit of 1, check the tag
+            if current_row.tag == tag:
+                cache_hits += 1
+            else:
+                cache_misses += 1
+    else:
+        # Check for compulsory miss
+        if current_row[0].valid == 0:
+            compulsory_misses += 1
+            cache_misses += 1
+            current_row[0].tag = tag
+            current_row[0].valid = 1
+        else:
+            # Check all rows for open block or tag match
+            for row in current_row:
+                if row.valid == 0:
+                    cache_misses += 1
+                    row.valid = 1
+                    row.tag = tag
+                    break
+                elif row.valid == 1 and row.tag == tag:
+                    cache_hits += 1
+                    break
 
 
 # Global values
-address = ''
-length = ''
-write_address = '0x00000000'
-read_address = '0x00000000'
-empty = '0x00000000'
+cache_accesses = []
+cache_hits = 0
+cache_misses = 0
+compulsory_misses = 0
+conflict_misses = 0
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
@@ -193,14 +227,17 @@ num_blocks = determine_number_of_blocks()
 overhead = determine_overhead()
 total_size = determine_total_implementation_size()
 
-# Print the specified headers
-print_formatted_header()
-print_generic_header()
-print_calculated_values()
-print_results()
-
 # Parse the trace file
 parse_file(results.trace_file)
 
 # Create the cache
 cache = Cache(indices, results.associativity)
+
+# Iterate through cache accesses list
+cache_access(cache_accesses)
+
+# Print the specified results
+#print_formatted_header()
+#print_generic_header()
+#print_calculated_values()
+print_results()
