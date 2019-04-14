@@ -144,6 +144,25 @@ def calculate_random_number(min_param, max_param):
     return randint(min_param, max_param)
 
 
+def get_round_robin(current_row):
+    for i in range(len(current_row)):
+        if current_row[i].used == 0:
+            current_row[i].used == 1
+            return i
+        elif current_row[i].used == 1 and len(current_row) == i:
+            for j in range(len(current_row)):
+                current_row[j].used == 0
+            return 0
+
+
+# def get_least_recently_used(current_row):
+#     global lru_number
+#     lru_number = 0
+#     for i in range(len(current_row)):
+#         current_row[i].used
+
+
+
 def cache_access(access_list):
     for entry in access_list:
         split = entry.split(',')
@@ -206,36 +225,65 @@ def check_cache(index, tag, access_length, offset_decimal):
                     current_row.tag = tag
                     break
         else:
+            for i in len(current_row):
+                if current_row[i].valid == 0:
+                    if current_row[0].valid == 0:
+                        compulsory_misses += 1
+                    cache_misses += 1
+                    current_row[0].tag = tag
+                    current_row[0].valid = 1
+                    break
+                elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
+                    cache_misses += 1
+                    # Random Replace
+                    if results.associativity == 'RND':
+                        random_num = calculate_random_number(0, len(current_row))
+                        current_row[random_num].tag = tag
+                    #Round Robin
+                    if results.associativity == 'RR':
+                        round_robin_index = get_round_robin(current_row)
+                        current_row[round_robin_index].tag = tag
+                    #Least Recently Used
+                    # if results.associativity == 'LRU':
+                    #     round_robin_index = get_least_recently_used(current_row)
+                    #     current_row[random_num].tag = tag
+
+                elif current_row[i].valid == 1 and current_row[i].tag == tag:
+                    cache_hits += 1
+                    break
+
+
             # Check for compulsory miss
-            if current_row[0].valid == 0:
-                compulsory_misses += 1
-                cache_misses += 1
-                current_row[0].tag = tag
-                current_row[0].valid = 1
-                break
-            else:
-                # Check all rows for open block or tag match
-                for i in len(current_row):
-                    if current_row[i].valid == 0:
-                        cache_misses += 1
-                        current_row[i].tag = tag
-                        current_row[i].valid = 1
-                        break
-                    elif current_row[i].valid == 1 and current_row[i].tag == tag:
-                        cache_hits += 1
-                        break
-                    elif current_row[i].valid == 1 and current_row[i].tag != tag:
-                        cache_misses += 1
-                        break
-                    elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
-                        # Random Replace
-                        if results.associativity == 'Random':
-                            random_num = calculate_random_number(0, len(current_row))
-                            current_row[random_num].tag = tag
+            # if current_row[0].valid == 0:
+            #     compulsory_misses += 1
+            #     cache_misses += 1
+            #     current_row[0].tag = tag
+            #     current_row[0].valid = 1
+            #     break
+            # else:
+            #     # Check all rows for open block or tag match
+            #     for i in len(current_row):
+            #         if current_row[i].valid == 0:
+            #             cache_misses += 1
+            #             current_row[i].tag = tag
+            #             current_row[i].valid = 1
+            #             break
+            #         elif current_row[i].valid == 1 and current_row[i].tag == tag:
+            #             cache_hits += 1
+            #             break
+            #         elif current_row[i].valid == 1 and current_row[i].tag != tag:
+            #             cache_misses += 1
+            #             break
+            #         elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
+            #             # Random Replace
+            #             if results.associativity == 'Random':
+            #                 random_num = calculate_random_number(0, len(current_row))
+            #                 current_row[random_num].tag = tag
                         # Round Robin
 
 
 # Global values
+lru_number = 0
 cache_accesses = []
 cache_hits = 0
 cache_misses = 0
