@@ -98,7 +98,7 @@ def print_calculated_values():
 def print_results():
     print('***** Cache Simulation Results *****')
     print()
-    print('Total Cache Accesses: ' + str(len(cache_accesses)))
+    print('Total Cache Accesses: ' + str(cache_special_access))
     print('Cache Hits: ' + str(cache_hits))
     print('Cache Misses: ' + str(cache_misses))
     print('--- Compulsory Misses: ' + str(compulsory_misses))
@@ -106,7 +106,7 @@ def print_results():
     print()
     print()
     print('***** ***** CACHE MISS RATE: ***** *****')
-    miss_rate = cache_misses/len(cache_accesses) * 100
+    miss_rate = cache_misses/cache_special_access * 100
     miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
     print(miss_rate_string + '%')
     print()
@@ -149,7 +149,7 @@ def get_round_robin(current_row):
         if current_row[i].used == 0:
             current_row[i].used == 1
             return i
-        elif current_row[i].used == 1 and len(current_row) == i:
+        elif current_row[i].used == 1 and len(current_row) == i + 1:
             for j in range(len(current_row)):
                 current_row[j].used == 0
             return 0
@@ -203,8 +203,10 @@ def check_cache(index, tag, access_length, offset_decimal):
     global compulsory_misses
     global cache_hits
     global cache_misses
+    global cache_special_access
     number_of_rows_to_get = determine_number_indices_to_access(access_length, offset_decimal)
     rows = get_rows_from_cache(index, number_of_rows_to_get)
+    cache_special_access += number_of_rows_to_get
 
     for current_row in rows:
         if results.associativity == 1:
@@ -225,7 +227,7 @@ def check_cache(index, tag, access_length, offset_decimal):
                     current_row.tag = tag
                     break
         else:
-            for i in len(current_row):
+            for i in range(len(current_row)):
                 if current_row[i].valid == 0:
                     if current_row[0].valid == 0:
                         compulsory_misses += 1
@@ -233,7 +235,7 @@ def check_cache(index, tag, access_length, offset_decimal):
                     current_row[0].tag = tag
                     current_row[0].valid = 1
                     break
-                elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
+                elif current_row[i].valid == 1 and current_row[i].tag != tag and i + 1 == len(current_row):
                     cache_misses += 1
                     # Random Replace
                     if results.associativity == 'RND':
@@ -289,6 +291,7 @@ cache_hits = 0
 cache_misses = 0
 compulsory_misses = 0
 conflict_misses = 0
+cache_special_access = 0
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
