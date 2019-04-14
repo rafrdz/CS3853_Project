@@ -6,6 +6,7 @@ import argparse
 import math
 import re
 from cache import Cache
+from random import randint
 
 # CS3853 Computer Architecture Project
 # Milestone 1
@@ -135,6 +136,14 @@ def parse_file(file):
         sys.exit(2)
 
 
+def determine_number_indices_to_access(access_length, offset_decimal):
+    return math.ceil((int(access_length) + int(offset_decimal))/results.block_size)
+
+
+def calculate_random_number(min_param, max_param):
+    return randint(min_param, max_param)
+
+
 def cache_access(access_list):
     for entry in access_list:
         split = entry.split(',')
@@ -159,50 +168,71 @@ def calculate_values(binary_string, access_length):
 
     # Calculate index decimal number
     index_decimal = str(int(index_bin, 2))
+    offset_decimal = str(int(offset_bin, 2))
 
-    check_cache(index_decimal, tag_hex, access_length)
+    check_cache(index_decimal, tag_hex, access_length, offset_decimal)
 
 
-def check_cache(index, tag, access_length):
+def get_rows_from_cache(index_decimal, number_to_access):
+    rows = []
+    for i in range(number_to_access):
+        rows.append(cache.get_row_by_index(int(index_decimal) + i))
+    return rows
+
+
+def check_cache(index, tag, access_length, offset_decimal):
     global compulsory_misses
     global cache_hits
     global cache_misses
-    # Get the current row based on the index
-    current_row = cache.get_row_by_index(int(index) - 1)
-    print('Cache access at index: ' + index + ', with tag: ' + tag)
+    number_of_rows_to_get = determine_number_indices_to_access(access_length, offset_decimal)
+    rows = get_rows_from_cache(index, number_of_rows_to_get)
 
-    # TODO: Need to add logic for replace and replacement algorithm
-    if results.associativity == 1:
-        # Check for compulsory miss
-        if current_row.valid == 0:
-            compulsory_misses += 1
-            cache_misses += 1
-            current_row.tag = tag
-            current_row.valid = 1
-        else:
-            # Row has a valid bit of 1, check the tag
-            if current_row.tag == tag:
-                cache_hits += 1
-            else:
+    for current_row in rows:
+        if results.associativity == 1:
+            # Check for compulsory miss
+            if current_row.valid == 0:
+                compulsory_misses += 1
                 cache_misses += 1
-    else:
-        # Check for compulsory miss
-        if current_row[0].valid == 0:
-            compulsory_misses += 1
-            cache_misses += 1
-            current_row[0].tag = tag
-            current_row[0].valid = 1
-        else:
-            # Check all rows for open block or tag match
-            for row in current_row:
-                if row.valid == 0:
-                    cache_misses += 1
-                    row.valid = 1
-                    row.tag = tag
-                    break
-                elif row.valid == 1 and row.tag == tag:
+                current_row.tag = tag
+                current_row.valid = 1
+                break
+            else:
+                # Row has a valid bit of 1, check the tag
+                if current_row.tag == tag:
                     cache_hits += 1
                     break
+                else:
+                    cache_misses += 1
+                    current_row.tag = tag
+                    break
+        else:
+            # Check for compulsory miss
+            if current_row[0].valid == 0:
+                compulsory_misses += 1
+                cache_misses += 1
+                current_row[0].tag = tag
+                current_row[0].valid = 1
+                break
+            else:
+                # Check all rows for open block or tag match
+                for i in len(current_row):
+                    if current_row[i].valid == 0:
+                        cache_misses += 1
+                        current_row[i].tag = tag
+                        current_row[i].valid = 1
+                        break
+                    elif current_row[i].valid == 1 and current_row[i].tag == tag:
+                        cache_hits += 1
+                        break
+                    elif current_row[i].valid == 1 and current_row[i].tag != tag:
+                        cache_misses += 1
+                        break
+                    elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
+                        # Random Replace
+                        if results.associativity == 'Random':
+                            random_num = calculate_random_number(0, len(current_row))
+                            current_row[random_num].tag = tag
+                        # Round Robin
 
 
 # Global values
