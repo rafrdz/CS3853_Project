@@ -100,13 +100,13 @@ def print_results():
     print()
     print('Total Cache Accesses: ' + str(cache_special_access))
     print('Cache Hits: ' + str(cache_hits))
-    print('Cache Misses: ' + str(cache_misses))
+    print('Cache Misses: ' + str(conflict_misses + compulsory_misses))
     print('--- Compulsory Misses: ' + str(compulsory_misses))
     print('--- Conflict Misses: ' + str(conflict_misses))
     print()
     print()
     print('***** ***** CACHE MISS RATE: ***** *****')
-    miss_rate = cache_misses/cache_special_access * 100
+    miss_rate = (conflict_misses + compulsory_misses)/cache_special_access * 100
     miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
     print(miss_rate_string + '%')
     print()
@@ -155,14 +155,6 @@ def get_round_robin(current_row):
             return 0
 
 
-# def get_least_recently_used(current_row):
-#     global lru_number
-#     lru_number = 0
-#     for i in range(len(current_row)):
-#         current_row[i].used
-
-
-
 def cache_access(access_list):
     for entry in access_list:
         split = entry.split(',')
@@ -204,53 +196,56 @@ def check_cache(index, tag, access_length, offset_decimal):
     global cache_hits
     global cache_misses
     global cache_special_access
+    global conflict_misses
     number_of_rows_to_get = determine_number_indices_to_access(access_length, offset_decimal)
     rows = get_rows_from_cache(index, number_of_rows_to_get)
     cache_special_access += number_of_rows_to_get
 
-    for current_row in rows:
+    for j in range(len(rows)):
         if results.associativity == 1:
             # Check for compulsory miss
-            if current_row.valid == 0:
+            if rows[j].valid == 0:
                 compulsory_misses += 1
-                cache_misses += 1
-                current_row.tag = tag
-                current_row.valid = 1
+                #cache_misses += 1
+                rows[j].tag = tag
+                rows[j].valid = 1
                 break
             else:
                 # Row has a valid bit of 1, check the tag
-                if current_row.tag == tag:
+                if rows[j].tag == tag:
                     cache_hits += 1
                     break
                 else:
-                    cache_misses += 1
-                    current_row.tag = tag
+                    conflict_misses += 1
+                    #cache_misses += 1
+                    rows[j].tag = tag
                     break
         else:
-            for i in range(len(current_row)):
-                if current_row[i].valid == 0:
-                    if current_row[0].valid == 0:
-                        compulsory_misses += 1
-                    cache_misses += 1
-                    current_row[0].tag = tag
-                    current_row[0].valid = 1
+            for i in range(len(rows[j])):
+                if rows[j][i].valid == 0:
+                    #if rows[j][0].valid == 0:
+                    compulsory_misses += 1
+                    #cache_misses += 1
+                    rows[j][i].tag = tag
+                    rows[j][i].valid = 1
                     break
-                elif current_row[i].valid == 1 and current_row[i].tag != tag and i + 1 == len(current_row):
-                    cache_misses += 1
+                elif rows[j][i].valid == 1 and rows[j][i].tag != tag and i + 1 == len(rows[j]):
+                    conflict_misses += 1
+                    #cache_misses += 1
                     # Random Replace
                     if results.associativity == 'RND':
-                        random_num = calculate_random_number(0, len(current_row))
-                        current_row[random_num].tag = tag
+                        random_num = calculate_random_number(0, len(rows[j]))
+                        rows[j][random_num].tag = tag
                     #Round Robin
                     if results.associativity == 'RR':
-                        round_robin_index = get_round_robin(current_row)
-                        current_row[round_robin_index].tag = tag
+                        round_robin_index = get_round_robin(rows[j])
+                        rows[j][round_robin_index].tag = tag
                     #Least Recently Used
                     # if results.associativity == 'LRU':
                     #     round_robin_index = get_least_recently_used(current_row)
                     #     current_row[random_num].tag = tag
 
-                elif current_row[i].valid == 1 and current_row[i].tag == tag:
+                elif rows[j][i].valid == 1 and rows[j][i].tag == tag:
                     cache_hits += 1
                     break
 
