@@ -63,12 +63,7 @@ def determine_total_implementation_size():
 def print_formatted_header():
     print('Cache Simulator - CS3853 - Spring 2019 - Group #006')
     print()
-    #print('Cmd Line: ' + ' '.join(sys.argv))
     print('Trace File: ' + results.trace_file)
-    #print('Cache Size: ' + str(results.cache_size))
-    #print('Block Size: ' + str(results.block_size))
-    #print('Associativity: ' + str(results.associativity))
-    #print('R-Policy: ' + results.replacement_policy)
     print()
 
 
@@ -98,7 +93,7 @@ def print_calculated_values():
 def print_results():
     print('***** Cache Simulation Results *****')
     print()
-    print('Total Cache Accesses: ' + str(cache_special_access))
+    print('Total Cache Accesses: ' + str(cache_access))
     print('Cache Hits: ' + str(cache_hits))
     print('Cache Misses: ' + str(conflict_misses + compulsory_misses))
     print('--- Compulsory Misses: ' + str(compulsory_misses))
@@ -106,7 +101,7 @@ def print_results():
     print()
     print()
     print('***** ***** CACHE MISS RATE: ***** *****')
-    miss_rate = (conflict_misses + compulsory_misses)/cache_special_access * 100
+    miss_rate = (conflict_misses + compulsory_misses)/cache_access * 100
     miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
     print(miss_rate_string + '%')
     print()
@@ -147,15 +142,15 @@ def calculate_random_number(min_param, max_param):
 def get_round_robin(current_row):
     for i in range(len(current_row)):
         if current_row[i].used == 0:
-            current_row[i].used == 1
+            current_row[i].used = 1
             return i
         elif current_row[i].used == 1 and len(current_row) == i + 1:
             for j in range(len(current_row)):
-                current_row[j].used == 0
+                current_row[j].used = 0
             return 0
 
 
-def cache_access(access_list):
+def access_the_cache(access_list):
     for entry in access_list:
         split = entry.split(',')
         binary_address = bin(int(split[0], 16))[2:].zfill(32)
@@ -174,8 +169,6 @@ def calculate_values(binary_string, access_length):
 
     # Convert bit pieces into hex
     tag_hex = hex(int(tag_bin, 2))
-    index_hex = hex(int(index_bin, 2))
-    offset_hex = hex(int(offset_bin, 2))
 
     # Calculate index decimal number
     index_decimal = str(int(index_bin, 2))
@@ -194,19 +187,17 @@ def get_rows_from_cache(index_decimal, number_to_access):
 def check_cache(index, tag, access_length, offset_decimal):
     global compulsory_misses
     global cache_hits
-    global cache_misses
-    global cache_special_access
+    global cache_access
     global conflict_misses
     number_of_rows_to_get = determine_number_indices_to_access(access_length, offset_decimal)
     rows = get_rows_from_cache(index, number_of_rows_to_get)
-    cache_special_access += number_of_rows_to_get
+    cache_access += number_of_rows_to_get
 
     for j in range(len(rows)):
         if results.associativity == 1:
             # Check for compulsory miss
             if rows[j].valid == 0:
                 compulsory_misses += 1
-                #cache_misses += 1
                 rows[j].tag = tag
                 rows[j].valid = 1
                 break
@@ -217,30 +208,27 @@ def check_cache(index, tag, access_length, offset_decimal):
                     break
                 else:
                     conflict_misses += 1
-                    #cache_misses += 1
                     rows[j].tag = tag
                     break
         else:
             for i in range(len(rows[j])):
                 if rows[j][i].valid == 0:
-                    #if rows[j][0].valid == 0:
+                    # if rows[j][0].valid == 0:
                     compulsory_misses += 1
-                    #cache_misses += 1
                     rows[j][i].tag = tag
                     rows[j][i].valid = 1
                     break
                 elif rows[j][i].valid == 1 and rows[j][i].tag != tag and i + 1 == len(rows[j]):
                     conflict_misses += 1
-                    #cache_misses += 1
                     # Random Replace
                     if results.associativity == 'RND':
                         random_num = calculate_random_number(0, len(rows[j]))
                         rows[j][random_num].tag = tag
-                    #Round Robin
+                    # Round Robin
                     if results.associativity == 'RR':
                         round_robin_index = get_round_robin(rows[j])
                         rows[j][round_robin_index].tag = tag
-                    #Least Recently Used
+                    # Least Recently Used
                     # if results.associativity == 'LRU':
                     #     round_robin_index = get_least_recently_used(current_row)
                     #     current_row[random_num].tag = tag
@@ -250,43 +238,13 @@ def check_cache(index, tag, access_length, offset_decimal):
                     break
 
 
-            # Check for compulsory miss
-            # if current_row[0].valid == 0:
-            #     compulsory_misses += 1
-            #     cache_misses += 1
-            #     current_row[0].tag = tag
-            #     current_row[0].valid = 1
-            #     break
-            # else:
-            #     # Check all rows for open block or tag match
-            #     for i in len(current_row):
-            #         if current_row[i].valid == 0:
-            #             cache_misses += 1
-            #             current_row[i].tag = tag
-            #             current_row[i].valid = 1
-            #             break
-            #         elif current_row[i].valid == 1 and current_row[i].tag == tag:
-            #             cache_hits += 1
-            #             break
-            #         elif current_row[i].valid == 1 and current_row[i].tag != tag:
-            #             cache_misses += 1
-            #             break
-            #         elif current_row[i].valid == 1 and current_row[i].tag != tag and i == len(current_row):
-            #             # Random Replace
-            #             if results.associativity == 'Random':
-            #                 random_num = calculate_random_number(0, len(current_row))
-            #                 current_row[random_num].tag = tag
-                        # Round Robin
-
-
 # Global values
 lru_number = 0
 cache_accesses = []
 cache_hits = 0
-cache_misses = 0
 compulsory_misses = 0
 conflict_misses = 0
-cache_special_access = 0
+cache_access = 0
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
@@ -320,7 +278,7 @@ parse_file(results.trace_file)
 cache = Cache(indices, results.associativity)
 
 # Iterate through cache accesses list
-cache_access(cache_accesses)
+access_the_cache(cache_accesses)
 
 # Print the specified results
 print_formatted_header()
