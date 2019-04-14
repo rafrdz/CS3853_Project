@@ -19,20 +19,20 @@ def determine_valid_file(string):
         raise argparse.ArgumentTypeError('file ' + string + ' does not exist')
 
 
-def cache_size_type(string, min=1, max=8192):
+def cache_size_type(string, min_param=1, max_param=8192):
     value = int(string)
-    if min <= value <= max:
+    if min_param <= value <= max_param:
         return value
     else:
-        raise argparse.ArgumentTypeError('value not in range ' + str(min) + ' - ' + str(max))
+        raise argparse.ArgumentTypeError('value not in range ' + str(min_param) + ' - ' + str(max_param))
 
 
-def block_size_type(string, min=4, max=64):
+def block_size_type(string, min_param=4, max_param=64):
     value = int(string)
-    if min <= value <= max:
+    if min_param <= value <= max_param:
         return value
     else:
-        raise argparse.ArgumentTypeError('value not in range ' + str(min) + ' - ' + str(max))
+        raise argparse.ArgumentTypeError('value not in range ' + str(min_param) + ' - ' + str(max_param))
 
 
 def determine_block_offset():
@@ -40,7 +40,8 @@ def determine_block_offset():
 
 
 def determine_index_size():
-    return int(math.log((results.cache_size * pow(2, 10)), 2) - (math.log(results.block_size, 2) + math.log(results.associativity, 2)))
+    return int(math.log((results.cache_size * pow(2, 10)), 2) - (math.log(results.block_size, 2) +
+                                                                 math.log(results.associativity, 2)))
 
 
 def determine_indices():
