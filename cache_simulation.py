@@ -9,7 +9,6 @@ from cache import Cache
 from random import randint
 
 # CS3853 Computer Architecture Project
-# Milestone 1
 # Team 6: Rafael Rodriguez, David Brenner, James Solis
 
 
