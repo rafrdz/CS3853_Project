@@ -200,16 +200,13 @@ def check_cache(index, tag, access_length, offset_decimal):
                 compulsory_misses += 1
                 rows[j].tag = tag
                 rows[j].valid = 1
-                break
             else:
                 # Row has a valid bit of 1, check the tag
                 if rows[j].tag == tag:
                     cache_hits += 1
-                    break
                 else:
                     conflict_misses += 1
                     rows[j].tag = tag
-                    break
         else:
             for i in range(len(rows[j])):
                 if rows[j][i].valid == 0:
@@ -221,18 +218,13 @@ def check_cache(index, tag, access_length, offset_decimal):
                 elif rows[j][i].valid == 1 and rows[j][i].tag != tag and i + 1 == len(rows[j]):
                     conflict_misses += 1
                     # Random Replace
-                    if results.associativity == 'RND':
-                        random_num = calculate_random_number(0, len(rows[j]))
+                    if results.replacement_policy == 'RND':
+                        random_num = calculate_random_number(0, len(rows[j]) - 1)
                         rows[j][random_num].tag = tag
                     # Round Robin
-                    if results.associativity == 'RR':
+                    if results.replacement_policy == 'RR':
                         round_robin_index = get_round_robin(rows[j])
                         rows[j][round_robin_index].tag = tag
-                    # Least Recently Used
-                    # if results.associativity == 'LRU':
-                    #     round_robin_index = get_least_recently_used(current_row)
-                    #     current_row[random_num].tag = tag
-
                 elif rows[j][i].valid == 1 and rows[j][i].tag == tag:
                     cache_hits += 1
                     break
