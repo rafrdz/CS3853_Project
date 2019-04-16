@@ -77,6 +77,23 @@ def access_the_cache(cache_rows, tag):
                     # We're not at the end, keep searching
                     else:
                         continue
+    # There are multiple row but only one block per row
+    elif len(cache_rows) > 1 and results.associativity == 1:
+        for i in range(len(cache_rows)):
+            block = cache_rows[i]
+            # Check for valid bit of first block being 0
+            # If so, compulsory miss and set tag and valid bit
+            if block.valid == 0:
+                compulsory_misses += 1
+                block.tag = tag
+                block.valid = 1
+            else:
+                # Valid bit is 1, check tag for match or set tag
+                if cache_rows[0].tag == tag:
+                    cache_hits += 1
+                else:
+                    conflict_misses += 1
+                    cache_rows[0].tag = tag
     # There are multiple rows
     elif len(cache_rows) > 1:
         for i in range(len(cache_rows)):
