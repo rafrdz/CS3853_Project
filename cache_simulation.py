@@ -1,242 +1,126 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import argparse
-import math
-import re
+import print_util
+import util
 from cache import Cache
-from random import randint
+from slice import Slice
 
 # CS3853 Computer Architecture Project
 # Team 6: Rafael Rodriguez, David Brenner, James Solis
 
 
-def determine_valid_file(string):
-    if os.path.isfile(string):
-        return string
-    else:
-        raise argparse.ArgumentTypeError('file ' + string + ' does not exist')
-
-
-def cache_size_type(string, min_param=1, max_param=8192):
-    value = int(string)
-    if min_param <= value <= max_param:
-        return value
-    else:
-        raise argparse.ArgumentTypeError('value not in range ' + str(min_param) + ' - ' + str(max_param))
-
-
-def block_size_type(string, min_param=4, max_param=64):
-    value = int(string)
-    if min_param <= value <= max_param:
-        return value
-    else:
-        raise argparse.ArgumentTypeError('value not in range ' + str(min_param) + ' - ' + str(max_param))
-
-
-def determine_block_offset():
-    return int(math.log(results.block_size, 2))
-
-
-def determine_index_size():
-    return int(math.log((results.cache_size * pow(2, 10)), 2) - (math.log(results.block_size, 2) +
-                                                                 math.log(results.associativity, 2)))
-
-
-def determine_indices():
-    return int((results.cache_size * pow(2, 10))/(results.block_size * results.associativity))
-
-
-def determine_number_of_blocks():
-    return int(indices * results.associativity)
-
-
-def determine_overhead():
-    return int(results.associativity * (1 + tag_size) * (indices/8))
-
-
-def determine_total_implementation_size():
-    return int((results.cache_size * pow(2, 10)) + overhead)
-
-
-def print_formatted_header():
-    print('Cache Simulator - CS3853 - Spring 2019 - Group #006')
-    print()
-    print('Trace File: ' + results.trace_file)
-    print()
-
-
-def print_generic_header():
-    print('***** Cache Input Parameters *****')
-    print()
-    print('Cache Size: ' + str(results.cache_size) + ' KB')
-    print('Block Size: ' + str(results.block_size) + ' bytes')
-    print('Associativity: ' + str(results.associativity))
-    print('Replacement Policy: ' + results.replacement_policy)
-    print()
-
-
-def print_calculated_values():
-    print('***** Cache Calculated Parameters *****')
-    print()
-    print('Total #Blocks: ' + str(num_blocks))
-    print('Tag Size: ' + str(tag_size) + ' bits')
-    print('Total # Rows: ' + str(indices))
-    print('Index Size: ' + str(index_size) + ' bits')
-    print('Overhead Memory Size: ' + str(int(overhead/1024)) + ' KB')
-    print('Implementation Memory Size: ' + str(int(total_size/1024)) + ' KB')
-    print()
-    print()
-
-
-def print_results():
-    print('***** Cache Simulation Results *****')
-    print()
-    print('Total Cache Accesses: ' + str(cache_access))
-    print('Cache Hits: ' + str(cache_hits))
-    print('Cache Misses: ' + str(conflict_misses + compulsory_misses))
-    print('--- Compulsory Misses: ' + str(compulsory_misses))
-    print('--- Conflict Misses: ' + str(conflict_misses))
-    print()
-    print()
-    print('***** ***** CACHE MISS RATE: ***** *****')
-    miss_rate = (conflict_misses + compulsory_misses)/cache_access * 100
-    miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
-    print(miss_rate_string + '%')
-    print()
-
-
-def parse_file(file):
-    empty = '0x00000000'
-    try:
-        with open(file, 'r') as f:
-            for line in f:
-                info = re.match(r'^.+\((\d{2})\).\s(.{8}).+$', line)
-                read_write = re.match(r'^.+:\s(\w{8}).*:\s(\w{8}).*$', line)
-                if info:
-                    address = '0x' + info.group(2)
-                    length = int(info.group(1))
-                    cache_accesses.append(address + ',' + str(length))
-                if read_write:
-                    write_address = '0x' + str(read_write.group(1))
-                    read_address = '0x' + str(read_write.group(2))
-                    if write_address != empty:
-                        cache_accesses.append(write_address + ',4')
-                    if read_address != empty:
-                        cache_accesses.append(read_address + ',4')
-    except FileNotFoundError:
-        print('Error: File was not found')
-        print('Please check that the file exists and try again')
-        sys.exit(2)
-
-
-def determine_number_indices_to_access(access_length, offset_decimal):
-    return math.ceil((int(access_length) + int(offset_decimal))/results.block_size)
-
-
-def calculate_random_number(min_param, max_param):
-    return randint(min_param, max_param)
-
-
-def get_round_robin(current_row):
-    for i in range(len(current_row)):
-        if current_row[i].used == 0:
-            current_row[i].used = 1
-            return i
-        elif current_row[i].used == 1 and len(current_row) == i + 1:
-            for j in range(len(current_row)):
-                current_row[j].used = 0
-            return 0
-
-
-def access_the_cache(access_list):
+def get_row_set_from_cache(access_list):
+    cache_offset = cache.get_offset()
+    cache_index_size = cache.get_index_size()
     for entry in access_list:
         split = entry.split(',')
-        binary_address = bin(int(split[0], 16))[2:].zfill(32)
-        calculate_values(binary_address, split[1])
+        #print('Address: ' + split[0] + ', Length: ' + split[1])
+        sliced_address = Slice(split[0], cache_offset, cache_index_size)
+        cache_row_set = cache.read_cache(split[1], sliced_address.get_offset(), sliced_address.get_index())
+        access_the_cache(split[1], cache_row_set, util.bin_to_hex(sliced_address.get_tag()))
 
 
-def calculate_values(binary_string, access_length):
-    # Calculate bit slices
-    offset_start = 32 - block_offset
-    index_start = offset_start - index_size
-
-    # Divide the binary string into the tag, index, and offset pieces
-    tag_bin = binary_string[0:index_start]
-    index_bin = binary_string[index_start:offset_start]
-    offset_bin = binary_string[offset_start:32]
-
-    # Convert bit pieces into hex
-    tag_hex = hex(int(tag_bin, 2))
-
-    # Calculate index decimal number
-    index_decimal = str(int(index_bin, 2))
-    offset_decimal = str(int(offset_bin, 2))
-
-    check_cache(index_decimal, tag_hex, access_length, offset_decimal)
-
-
-def get_rows_from_cache(index_decimal, number_to_access):
-    rows = []
-    for i in range(number_to_access):
-        rows.append(cache.get_row_by_index(int(index_decimal) + i))
-    return rows
-
-
-def check_cache(index, tag, access_length, offset_decimal):
+def access_the_cache(access_length, cache_rows, tag):
     global compulsory_misses
     global cache_hits
-    global cache_access
+    global cache_accesses
     global conflict_misses
-    number_of_rows_to_get = determine_number_indices_to_access(access_length, offset_decimal)
-    rows = get_rows_from_cache(index, number_of_rows_to_get)
-    cache_access += number_of_rows_to_get
+    cache_accesses += len(cache_rows)
 
-    for j in range(len(rows)):
-        if results.associativity == 1:
-            # Check for compulsory miss
-            if rows[j].valid == 0:
-                compulsory_misses += 1
-                rows[j].tag = tag
-                rows[j].valid = 1
-            else:
-                # Row has a valid bit of 1, check the tag
-                if rows[j].tag == tag:
-                    cache_hits += 1
-                else:
-                    conflict_misses += 1
-                    rows[j].tag = tag
+    # There is only a single row to access and a single column
+    if len(cache_rows) == 1 and results.associativity == 1:
+        # Check for valid bit of 0, compulsory miss
+        if cache_rows[0].valid == 0:
+            compulsory_misses += 1
+            cache_rows[0].tag = tag
+            cache_rows[0].valid = 1
         else:
-            for i in range(len(rows[j])):
-                if rows[j][i].valid == 0:
-                    # if rows[j][0].valid == 0:
-                    compulsory_misses += 1
-                    rows[j][i].tag = tag
-                    rows[j][i].valid = 1
-                    break
-                elif rows[j][i].valid == 1 and rows[j][i].tag != tag and i + 1 == len(rows[j]):
-                    conflict_misses += 1
-                    # Random Replace
-                    if results.replacement_policy == 'RND':
-                        random_num = calculate_random_number(0, len(rows[j]) - 1)
-                        rows[j][random_num].tag = tag
-                    # Round Robin
-                    if results.replacement_policy == 'RR':
-                        round_robin_index = get_round_robin(rows[j])
-                        rows[j][round_robin_index].tag = tag
-                elif rows[j][i].valid == 1 and rows[j][i].tag == tag:
+            # Valid bit is 1, check tag for match or set tag
+            if cache_rows[0].tag == tag:
+                cache_hits += 1
+            else:
+                conflict_misses += 1
+                cache_rows[0].tag = tag
+
+    # There is only a single row but multiple blocks per row
+    if len(cache_rows) == 1 and results.associativity > 1:
+        for i in range(len(cache_rows[0])):
+            block = cache_rows[0][i]
+            # Check for valid bit of first block being 0
+            # If so, compulsory miss and set tag and valid bit
+            if block.valid == 0:
+                compulsory_misses += 1
+                block.tag = tag
+                block.valid = 1
+                break
+            if block.valid == 1:
+                # If tag of valid block matches address tag, hit
+                if block.tag == tag:
                     cache_hits += 1
                     break
+                # If tag of valid block does not match address tag,
+                # check for current position in row
+                else:
+                    # If true, we're at the end of the row, need to replace
+                    if i == (len(cache_rows[0]) - 1):
+                        conflict_misses += 1
+                        # Random Replace
+                        if results.replacement == 'RND':
+                            random_num = util.calculate_random_number(0, (len(cache_rows[0]) - 1))
+                            cache_rows[0][random_num].tag = tag
+                        # Round Robin
+                        if results.replacement == 'RR':
+                            round_robin_index = util.determine_round_robin(cache_rows[0])
+                            cache_rows[0][round_robin_index].tag = tag
+                        break
+                    # We're not at the end, keep searching
+                    else:
+                        continue
+    # There are multiple rows
+    if len(cache_rows) > 1:
+        for i in range(len(cache_rows)):
+            current_row = cache_rows[i]
+            for j in range(len(current_row)):
+                block = current_row[j]
+                # Check for valid bit of first block being 0
+                # If so, compulsory miss and set tag and valid bit
+                if block.valid == 0:
+                    compulsory_misses += 1
+                    block.tag = tag
+                    block.valid = 1
+                    break
+                if block.valid == 1:
+                    # If tag of valid block matches address tag, hit
+                    if block.tag == tag:
+                        cache_hits += 1
+                        break
+                    # If tag of valid block does not match address tag,
+                    # check for current position in row
+                    else:
+                        # If true, we're at the end of the row, need to replace
+                        if j == (len(cache_rows[0]) - 1):
+                            conflict_misses += 1
+                            # Random Replace
+                            if results.replacement == 'RND':
+                                random_num = util.calculate_random_number(0, (len(cache_rows[0]) - 1))
+                                cache_rows[0][random_num].tag = tag
+                            # Round Robin
+                            if results.replacement == 'RR':
+                                round_robin_index = util.determine_round_robin(cache_rows[0])
+                                cache_rows[0][round_robin_index].tag = tag
+                            break
+                        # We're not at the end, keep searching
+                        else:
+                            continue
 
 
 # Global values
-lru_number = 0
-cache_accesses = []
+cache_accesses = 0
 cache_hits = 0
 compulsory_misses = 0
 conflict_misses = 0
-cache_access = 0
 
 # Verify the correct number of arguments
 if len(sys.argv) < 11:
@@ -247,33 +131,25 @@ if len(sys.argv) < 11:
 
 # Define the parser arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-f', action="store", dest="trace_file", type=determine_valid_file)
-parser.add_argument('-s', action="store", dest="cache_size", type=cache_size_type)
-parser.add_argument('-b', action="store", dest="block_size", type=block_size_type)
+parser.add_argument('-f', action="store", dest="trace_file", type=util.determine_valid_file)
+parser.add_argument('-s', action="store", dest="cache_size", type=util.cache_size_type)
+parser.add_argument('-b', action="store", dest="block_size", type=util.block_size_type)
 parser.add_argument('-a', action="store", dest="associativity", type=int, choices=[1, 2, 4, 8, 16])
-parser.add_argument('-r', action="store", dest="replacement_policy", choices=['RR', 'RND', 'LRU'])
+parser.add_argument('-r', action="store", dest="replacement", choices=['RR', 'RND', 'LRU'])
 results = parser.parse_args()
 
-# Calculate values
-block_offset = determine_block_offset()
-index_size = determine_index_size()
-tag_size = 32 - index_size - block_offset
-indices = determine_indices()
-num_blocks = determine_number_of_blocks()
-overhead = determine_overhead()
-total_size = determine_total_implementation_size()
-
 # Parse the trace file
-parse_file(results.trace_file)
+cache_access_list = util.parse_file(results.trace_file)
 
-# Create the cache
-cache = Cache(indices, results.associativity)
+# Create the cache access list
+cache = Cache(results.cache_size, results.block_size, results.associativity, results.replacement)
 
-# Iterate through cache accesses list
-access_the_cache(cache_accesses)
+# Iterate through accesses
+get_row_set_from_cache(cache_access_list)
 
 # Print the specified results
-print_formatted_header()
-print_generic_header()
-print_calculated_values()
-print_results()
+print_util.print_formatted_header(results.trace_file)
+print_util.print_generic_header(results.cache_size, results.block_size, results.associativity, results.replacement)
+print_util.print_calculated_values(cache.get_num_blocks(), cache.get_tag_size(), cache.get_indices(),
+                                   cache.get_index_size(), cache.get_overhead_size(), cache.get_total_size())
+print_util.print_results(cache_accesses, cache_hits, conflict_misses, compulsory_misses)
