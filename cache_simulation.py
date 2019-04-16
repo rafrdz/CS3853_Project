@@ -43,9 +43,8 @@ def access_the_cache(cache_rows, tag):
             else:
                 conflict_misses += 1
                 cache_rows[0].tag = tag
-
     # There is only a single row but multiple blocks per row
-    if len(cache_rows) == 1 and results.associativity > 1:
+    elif len(cache_rows) == 1 and results.associativity > 1:
         for i in range(len(cache_rows[0])):
             block = cache_rows[0][i]
             # Check for valid bit of first block being 0
@@ -79,7 +78,7 @@ def access_the_cache(cache_rows, tag):
                     else:
                         continue
     # There are multiple rows
-    if len(cache_rows) > 1:
+    elif len(cache_rows) > 1:
         for i in range(len(cache_rows)):
             current_row = cache_rows[i]
             for j in range(len(current_row)):
