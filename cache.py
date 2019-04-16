@@ -53,13 +53,13 @@ class Cache:
     def get_offset(self):
         return self._offset
 
-    def get_row_by_index(self, index):
-        return self._rows[index - 1]
-
     def read_cache(self, access_length, offset, index_bin):
         num_rows = math.ceil((access_length + offset)/self._block_size)
         return self._get_cache_rows(util.bin_to_dec(index_bin), num_rows)
 
     def _get_cache_rows(self, index, num_rows):
         index = index - 1
-        return self._rows[index:index + num_rows]
+        cache_rows = []
+        for i in range(num_rows):
+            cache_rows.append(self._rows[index + i])
+        return cache_rows
