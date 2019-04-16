@@ -1,6 +1,5 @@
 import argparse
 import os
-import math
 import sys
 import re
 from random import randint
