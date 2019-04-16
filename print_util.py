@@ -8,22 +8,26 @@ def print_formatted_header(trace_file):
 def print_generic_header(cache_size, block_size, associativity, replacement_policy):
     print('***** Cache Input Parameters *****')
     print()
-    print('Cache Size: ' + str(cache_size) + ' KB')
-    print('Block Size: ' + str(block_size) + ' bytes')
-    print('Associativity: ' + str(associativity))
-    print('Replacement Policy: ' + replacement_policy)
+    print('{:32}'.format('Cache Size:') + str(cache_size) + ' KB')
+    print('{:32}'.format('Block Size:') + str(block_size) + ' bytes')
+    print('{:32}'.format('Associativity:') + str(associativity))
+    print('{:32}'.format('Replacement Policy:') + replacement_policy)
     print()
 
 
 def print_calculated_values(num_blocks, tag_size, indices, index_size, overhead, total_size):
     print('***** Cache Calculated Parameters *****')
     print()
-    print('Total #Blocks: ' + str(num_blocks))
-    print('Tag Size: ' + str(tag_size) + ' bits')
-    print('Total # Rows: ' + str(indices))
-    print('Index Size: ' + str(index_size) + ' bits')
-    print('Overhead Memory Size: ' + str(int(overhead/1024)) + ' KB')
-    print('Implementation Memory Size: ' + str(int(total_size/1024)) + ' KB')
+    print('{:32}'.format('Total #Blocks:') + str(num_blocks))
+    print('{:32}'.format('Tag Size:') + str(tag_size) + ' bits')
+    print('{:32}'.format('Total # Rows:') + str(indices))
+    print('{:32}'.format('Index Size:') + str(index_size) + ' bits')
+    overhead_size = overhead/1024
+    overhead_string = '%.2f' % overhead_size
+    print('{:32}'.format('Overhead Memory Size:') + overhead_string + ' KB')
+    implementation_size = total_size/1024
+    implementation_string = '%.2f' % implementation_size
+    print('{:32}'.format('Implementation Memory Size:') + implementation_string + ' KB')
     print()
     print()
 
@@ -31,11 +35,11 @@ def print_calculated_values(num_blocks, tag_size, indices, index_size, overhead,
 def print_results(cache_accesses, cache_hits, conflict_misses, compulsory_misses):
     print('***** Cache Simulation Results *****')
     print()
-    print('Total Cache Accesses: ' + str(cache_accesses))
-    print('Cache Hits: ' + str(cache_hits))
-    print('Cache Misses: ' + str(conflict_misses + compulsory_misses))
-    print('--- Compulsory Misses: ' + str(compulsory_misses))
-    print('--- Conflict Misses: ' + str(conflict_misses))
+    print('{:24}'.format('Total Cache Accesses:') + str(cache_accesses))
+    print('{:24}'.format('Cache Hits:') + str(cache_hits))
+    print('{:24}'.format('Cache Misses:') + str(conflict_misses + compulsory_misses))
+    print('{:27}'.format('--- Compulsory Misses:') + str(compulsory_misses))
+    print('{:27}'.format('--- Conflict Misses:') + str(conflict_misses))
     print()
     print()
     print('***** ***** CACHE MISS RATE: ***** *****')
