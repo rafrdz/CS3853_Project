@@ -16,13 +16,13 @@ def get_row_set_from_cache(access_list):
     cache_index_size = cache.get_index_size()
     for entry in access_list:
         split = entry.split(',')
-        #print('Address: ' + split[0] + ', Length: ' + split[1])
         sliced_address = Slice(split[0], cache_offset, cache_index_size)
-        cache_row_set = cache.read_cache(split[1], sliced_address.get_offset(), sliced_address.get_index())
-        access_the_cache(split[1], cache_row_set, util.bin_to_hex(sliced_address.get_tag()))
+        cache_row_set = cache.read_cache(int(split[1]), util.bin_to_dec(sliced_address.get_offset()),
+                                         sliced_address.get_index())
+        access_the_cache(cache_row_set, util.bin_to_hex(sliced_address.get_tag()))
 
 
-def access_the_cache(access_length, cache_rows, tag):
+def access_the_cache(cache_rows, tag):
     global compulsory_misses
     global cache_hits
     global cache_accesses

@@ -1,7 +1,6 @@
 import math
 import util
 from row import Row
-from slice import Slice
 
 
 class Cache:
@@ -57,9 +56,10 @@ class Cache:
     def get_row_by_index(self, index):
         return self._rows[index - 1]
 
-    def read_cache(self, access_length, offset_bin, index_bin):
-        num_rows = math.ceil((int(access_length) + util.bin_to_dec(offset_bin))/self._block_size)
-        return self._get_cache_rows(util.bin_to_dec(index_bin) - 1, num_rows)
+    def read_cache(self, access_length, offset, index_bin):
+        num_rows = math.ceil((access_length + offset)/self._block_size)
+        return self._get_cache_rows(util.bin_to_dec(index_bin), num_rows)
 
     def _get_cache_rows(self, index, num_rows):
-        return self._rows[index:(index + (num_rows - 1))]
+        index = index - 1
+        return self._rows[index:index + num_rows]
