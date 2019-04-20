@@ -27,39 +27,39 @@ def check_cache(row, tag):
     global cache_hits
     global conflict_misses
 
-    if results.associativity == 1:
-        if row.valid == 0:
+    # if results.associativity == 1:
+    #     if row.valid == 0:
+    #         compulsory_misses += 1
+    #         row.tag = tag
+    #         row.valid = 1
+    #     else:
+    #         if row.tag != tag:
+    #             conflict_misses += 1
+    #             row.tag = tag
+    #         else:
+    #             cache_hits += 1
+    # else:
+    for i in range(len(row)):
+        block = row[i]
+        if block.valid == 0:
             compulsory_misses += 1
-            row.tag = tag
-            row.valid = 1
+            block.tag = tag
+            block.valid = 1
         else:
-            if row.tag != tag:
+            if i == len(row) - 1 and i > 0 and block.tag != tag:
                 conflict_misses += 1
-                row.tag = tag
-            else:
+                # Random Replace
+                if results.replacement == 'RND':
+                    random_num = util.calculate_random_number(0, (len(block) - 1))
+                    block[random_num].tag = tag
+                    break
+                # Round Robin
+                if results.replacement == 'RR':
+                    round_robin_index = util.determine_round_robin(block)
+                    block[round_robin_index].tag = tag
+                    break
+            elif block.tag == tag:
                 cache_hits += 1
-    else:
-        for i in range(len(row)):
-            block = range[i]
-            if block.valid == 0:
-                compulsory_misses += 1
-                block.tag = tag
-                block.valid = 1
-            else:
-                if i == len(row) - 1 and i > 0 and block.tag != tag:
-                    conflict_misses += 1
-                    # Random Replace
-                    if results.replacement == 'RND':
-                        random_num = util.calculate_random_number(0, (len(block) - 1))
-                        block[random_num].tag = tag
-                        break
-                    # Round Robin
-                    if results.replacement == 'RR':
-                        round_robin_index = util.determine_round_robin(block)
-                        block[round_robin_index].tag = tag
-                        break
-                elif block.tag == tag:
-                    cache_hits += 1
 
 
 def access_the_cache(cache_rows, tag):

@@ -13,16 +13,13 @@ class Cache:
         self._indices = int((self._size * pow(2, 10))/(self._block_size * self._associativity))
         self._blocks = int(self._indices * self._associativity)
 
-        if associativity == 1:
-            self._rows = [Row() for i in range(self._indices)]
-        else:
-            temp_rows = []
-            for i in range(self._indices):
-                rows = []
-                for a in range(associativity):
-                    rows.append(Row())
-                temp_rows.append(rows)
-            self._rows = temp_rows
+        temp_rows = []
+        for i in range(self._indices):
+            rows = []
+            for a in range(associativity):
+                rows.append(Row())
+            temp_rows.append(rows)
+        self._rows = temp_rows
 
         self._index_size = int(math.log((self._size * pow(2, 10)), 2) - (math.log(self._block_size, 2) +
                                                                          math.log(self._associativity, 2)))
@@ -61,6 +58,8 @@ class Cache:
         index = index - 1
         cache_rows = []
         for i in range(num_rows):
-            if index + i <= len(self._rows) - 1:
+            if index + i < len(self._rows):
                 cache_rows.append(self._rows[index + i])
+            else:
+                cache_rows.append(self._rows[index + 1 - len(self._rows)])
         return cache_rows
