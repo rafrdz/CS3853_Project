@@ -42,8 +42,11 @@ def print_results(cache_accesses, cache_hits, conflict_misses, compulsory_misses
     print('{:27}'.format('--- Conflict Misses:') + str(conflict_misses))
     print()
     print()
-    print('***** ***** CACHE MISS RATE: ***** *****')
+    print('***** ***** CACHE MISS/HIT RATE: ***** *****')
     miss_rate = (conflict_misses + compulsory_misses)/cache_accesses * 100
+    hit_rate = 100 - miss_rate
     miss_rate_string = 'Cache Miss Rate: %.4f' % miss_rate
+    hit_rate_string = 'Cache Hit Rate: %.4f' % hit_rate
     print(miss_rate_string + '%')
+    print(hit_rate_string + '%')
     print()
