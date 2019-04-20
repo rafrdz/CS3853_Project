@@ -45,21 +45,25 @@ def check_cache(row, tag):
             compulsory_misses += 1
             block.tag = tag
             block.valid = 1
+            break
         else:
-            if i == len(row) - 1 and i > 0 and block.tag != tag:
+            if i == len(row) - 1 and block.tag != tag:
                 conflict_misses += 1
                 # Random Replace
                 if results.replacement == 'RND':
-                    random_num = util.calculate_random_number(0, (len(block) - 1))
-                    block[random_num].tag = tag
+                    random_num = util.calculate_random_number(0, (len(row) - 1))
+                    row[random_num].tag = tag
                     break
                 # Round Robin
                 if results.replacement == 'RR':
-                    round_robin_index = util.determine_round_robin(block)
-                    block[round_robin_index].tag = tag
+                    round_robin_index = util.determine_round_robin(row)
+                    row[round_robin_index].tag = tag
                     break
             elif block.tag == tag:
                 cache_hits += 1
+                break
+            else:
+                continue
 
 
 def access_the_cache(cache_rows, tag):

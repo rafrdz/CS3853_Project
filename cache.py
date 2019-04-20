@@ -61,5 +61,5 @@ class Cache:
             if index + i < len(self._rows):
                 cache_rows.append(self._rows[index + i])
             else:
-                cache_rows.append(self._rows[index + 1 - len(self._rows)])
+                cache_rows.append(self._rows[index + i - len(self._rows)])
         return cache_rows
