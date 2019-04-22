@@ -81,7 +81,7 @@ parser.add_argument('-f', action="store", dest="trace_file", type=util.determine
 parser.add_argument('-s', action="store", dest="cache_size", type=util.cache_size_type)
 parser.add_argument('-b', action="store", dest="block_size", type=util.block_size_type)
 parser.add_argument('-a', action="store", dest="associativity", type=int, choices=[1, 2, 4, 8, 16])
-parser.add_argument('-r', action="store", dest="replacement", choices=['RR', 'RND', 'LRU'])
+parser.add_argument('-r', action="store", dest="replacement", choices=['RR', 'RND'])
 results = parser.parse_args()
 
 # Parse the trace file
