@@ -1,0 +1,37 @@
+C:\python.exe C:/cache_simulation.py -f sample_trace_files/A-9_new_1.5.pdf.trc -s 1 -b 4 -a 1 -r RR
+Cache Simulator - CS3853 - Spring 2019 - Group #006
+
+Trace File: sample_trace_files/A-9_new_1.5.pdf.trc
+
+***** Cache Input Parameters *****
+
+Cache Size:                     1 KB
+Block Size:                     4 bytes
+Associativity:                  1
+Replacement Policy:             RR
+
+***** Cache Calculated Parameters *****
+
+Total #Blocks:                  256
+Tag Size:                       22 bits
+Total # Rows:                   256
+Index Size:                     8 bits
+Overhead Memory Size:           0.72 KB
+Implementation Memory Size:     1.72 KB
+
+
+***** Cache Simulation Results *****
+
+Total Cache Accesses:   482641
+Cache Hits:             291478
+Cache Misses:           191163
+--- Compulsory Misses:     256
+--- Conflict Misses:       190907
+
+
+***** ***** CACHE MISS/HIT RATE: ***** *****
+Cache Miss Rate: 39.6077%
+Cache Hit Rate: 60.3923%
+
+
+Process finished with exit code 0
